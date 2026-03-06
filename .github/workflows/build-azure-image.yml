@@ -1,0 +1,50 @@
+name: Build Azure NixOS Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      host:
+        description: "nixosConfigurations host to build"
+        required: true
+        default: "whittier"
+        type: choice
+        options:
+          - whittier
+          - local-dev
+
+permissions:
+  contents: read
+
+jobs:
+  build-azure-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      NIX_CONFIG: "experimental-features = nix-command flakes"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v19
+
+      - name: Build Azure image
+        run: |
+          set -euxo pipefail
+          nix run github:nix-community/nixos-generators -- \
+            -f azure \
+            --flake .#${{ inputs.host }}
+
+      - name: Collect image artifacts
+        run: |
+          set -euxo pipefail
+          mkdir -p dist
+          cp -aL result/* dist/
+          ls -lah dist
+
+      - name: Upload Azure image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: azure-image-${{ inputs.host }}-${{ github.run_number }}
+          path: dist/
+          if-no-files-found: error

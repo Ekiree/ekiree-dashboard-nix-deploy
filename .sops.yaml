@@ -1,0 +1,7 @@
+keys:
+  - &whittier age1amtft2rfy0klmxzcxj228u7d3xc8tatywmlxphdht5z4neqw0p0snxv3m7
+creation_rules:
+  - path_regex: secrets/whittier\.yaml$
+    key_groups:
+      - age:
+          - *whittier

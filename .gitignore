@@ -1,0 +1,5 @@
+flake.lock
+secrets/*.yaml
+!secrets/*.example
+secrets/*.env
+!secrets/*.env.example
